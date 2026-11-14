@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/../src/helpers.php';
 require_login();
+require_post_with_csrf();
 
-$id      = $_GET['id'] ?? '';
-$topicId = $_GET['topic_id'] ?? '';
+$id      = $_POST['id'] ?? '';
+$topicId = $_POST['topic_id'] ?? '';
 
 // Confirm ownership: the comment author, the topic owner, or an admin.
 $stmt = db()->prepare(

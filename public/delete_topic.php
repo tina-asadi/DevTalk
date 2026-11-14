@@ -1,8 +1,9 @@
 <?php
 require_once __DIR__ . '/../src/helpers.php';
 require_login();
+require_post_with_csrf();
 
-$id = $_GET['id'] ?? '';
+$id = $_POST['id'] ?? '';
 
 // Load the topic and confirm the current user owns it (admins may delete any).
 $stmt = db()->prepare('SELECT user_id FROM topics WHERE id = ?');

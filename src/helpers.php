@@ -29,6 +29,40 @@ function require_login(): void
     }
 }
 
+/**
+ * Return the session's anti-CSRF token, creating one on first use.
+ */
+function csrf_token(): string
+{
+    if (empty($_SESSION['csrf'])) {
+        $_SESSION['csrf'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf'];
+}
+
+/**
+ * Hidden form field carrying the anti-CSRF token.
+ */
+function csrf_field(): string
+{
+    return '<input type="hidden" name="csrf" value="' . htmlspecialchars(csrf_token()) . '">';
+}
+
+/**
+ * Abort unless the request is a POST carrying a valid anti-CSRF token.
+ * Defeats cross-site request forgery and GET-based state changes.
+ */
+function require_post_with_csrf(): void
+{
+    $token = $_POST['csrf'] ?? '';
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST'
+        || !is_string($token)
+        || !hash_equals(csrf_token(), $token)) {
+        http_response_code(403);
+        exit('Invalid or missing CSRF token.');
+    }
+}
+
 function render_header(string $title = APP_NAME): void
 {
     $user = current_user();
