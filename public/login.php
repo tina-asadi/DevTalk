@@ -6,21 +6,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'] ?? '';
     $password = $_POST['password'] ?? '';
 
-    $sql = "SELECT * FROM users
-            WHERE username = '$username' AND password = '$password'";
+    // Bind the username as a parameter so input can never be parsed as SQL.
+    $stmt = db()->prepare('SELECT * FROM users WHERE username = ?');
+    $stmt->execute([$username]);
+    $row = $stmt->fetch();
 
-    try {
-        $row = db()->query($sql)->fetch();
-        if ($row) {
-            $_SESSION['user_id'] = (int) $row['id'];
-            header('Location: index.php');
-            exit;
-        }
-        $error = 'Invalid username or password.';
-    } catch (PDOException $e) {
-        $error = 'Login query failed: ' . $e->getMessage()
-            . '<br><code>' . htmlspecialchars($sql) . '</code>';
+    if ($row && $password === $row['password']) {
+        $_SESSION['user_id'] = (int) $row['id'];
+        header('Location: index.php');
+        exit;
     }
+    $error = 'Invalid username or password.';
 }
 
 render_header('Log in');
