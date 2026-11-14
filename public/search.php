@@ -7,12 +7,15 @@ $results = [];
 $sqlError = '';
 
 if ($q !== '') {
-    $sql = "SELECT id, title, body FROM topics WHERE title LIKE '%$q%' OR body LIKE '%$q%' ORDER BY created_at DESC";
-    try {
-        $results = db()->query($sql)->fetchAll();
-    } catch (PDOException $e) {
-        $sqlError = $e->getMessage() . ' — query: ' . $sql;
-    }
+    // Bind the search term as a LIKE parameter. The % wildcards are added to
+    // the value, not the SQL, so the term is always treated as data.
+    $like = '%' . $q . '%';
+    $stmt = db()->prepare(
+        'SELECT id, title, body FROM topics
+         WHERE title LIKE ? OR body LIKE ? ORDER BY created_at DESC'
+    );
+    $stmt->execute([$like, $like]);
+    $results = $stmt->fetchAll();
 }
 
 render_header('Search');
