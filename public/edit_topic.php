@@ -15,6 +15,16 @@ if (!$topic) {
     exit;
 }
 
+// Only the topic's author (or an admin) may edit it.
+$me = current_user();
+if ((int) $topic['user_id'] !== (int) $me['id'] && !$me['is_admin']) {
+    http_response_code(403);
+    render_header('Forbidden');
+    echo '<div class="alert alert-danger">You are not allowed to edit this topic.</div>';
+    render_footer();
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $body  = $_POST['body'] ?? '';

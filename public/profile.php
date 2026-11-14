@@ -4,11 +4,12 @@ require_once __DIR__ . '/../src/helpers.php';
 $id = $_GET['id'] ?? ($_POST['user_id'] ?? '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && is_logged_in()) {
-    $bio    = $_POST['bio'] ?? '';
-    $userId = $_POST['user_id'] ?? '';
+    $bio = $_POST['bio'] ?? '';
+    // Ignore any user_id in the request: a user may only edit their own bio.
+    $userId = (int) $_SESSION['user_id'];
     $upd = db()->prepare('UPDATE users SET bio = ? WHERE id = ?');
     $upd->execute([$bio, $userId]);
-    header('Location: profile.php?id=' . (int) $userId);
+    header('Location: profile.php?id=' . $userId);
     exit;
 }
 
