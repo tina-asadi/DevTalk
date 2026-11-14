@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$username]);
     $row = $stmt->fetch();
 
-    if ($row && $password === $row['password']) {
+    if ($row && password_verify($password, $row['password'])) {
         $_SESSION['user_id'] = (int) $row['id'];
         header('Location: index.php');
         exit;

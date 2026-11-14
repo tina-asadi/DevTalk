@@ -11,15 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'All fields are required.';
     } else {
         try {
+            $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = db()->prepare(
                 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)'
             );
-            $stmt->execute([$username, $email, $password]);
+            $stmt->execute([$username, $email, $hash]);
             $_SESSION['user_id'] = (int) db()->lastInsertId();
             header('Location: index.php');
             exit;
         } catch (PDOException $e) {
-            $error = 'Could not register: ' . $e->getMessage();
+            // Log the detail, show the user a generic message only.
+            error_log('Registration failed: ' . $e->getMessage());
+            $error = 'Could not register. That username or email may already be in use.';
         }
     }
 }
